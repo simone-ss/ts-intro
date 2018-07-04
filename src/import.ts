@@ -1,69 +1,51 @@
-import rp from 'request-promise';
-import cheerio from 'cheerio';
+//import rp from 'request-promise';
+//import cheerio from 'cheerio';
 
 const config = require('./config/config');
 
-import mysql, { Query } from 'mysql';
-import {Product} from  './lib/Model/Product/Product';
+import mysql from 'mysql';
+//import {Product} from  './lib/Model/Product/Product';
 
-//import {ProductStorageMysql} from '.app/lib/Infrastructure/ProductStorageMysql';
 import {ProductStorageMysql} from './lib/Infrastructure/ProductStorageMysql';
+import {Scraper} from 'app/lib/Infrastructure/Scraper';
 
-
-//Create connection and connect
+//Create db connection
 let connection = mysql.createConnection(config.db);
 connection.connect();
-let importedProductCount = 0;
+
+// Initialize productStorage
+let productStorage =  new ProductStorageMysql(connection);
+productStorage.list(0,10);
+
+// Initialize productScraper
+let productScraper = new Scraper(
+    config.scraper.fistPageUrl,
+    config.scraper.pageUrlPagination,
+    config.scraper.numberOfPage
+);
 
 
 
+async function importProducts()
+{
+   await productScraper.scrapeAll();
+   console.log( productScraper.products);
+   productScraper.products.forEach(product => {
+        productStorage.save(product);
+   });
+}
 
+async function run()
+{
+    await importProducts();
+    connection.end();
+}
 
-let productStorage = new ProductStorageMysql(connection);
-console.log('List=====> ', productStorage.list(0,10));
-
-
-
-
-
-
-
-/**
- * Inser the product into the database
- * 
- * @param p : Product
- */
-async function insertProductIntoDB(p:Product) {
-
-        var sql = "INSERT INTO product (id, name, brand, url, timestamp_added) VALUES ?";
-        var dateTime = new Date();
-        var timeNow = dateTime.getFullYear()+'-'+dateTime.getMonth()+'-'+dateTime.getDay()+' '+dateTime.getHours()+':'+dateTime.getMinutes();
-        var values = [
-          [p.id, p.name, p.brand, p.url,  timeNow]
-        ];
-       var _x : Query  =  await connection.query(sql, [values], function (_err, result) {
-          if (_err) {
-            //console.log(_err);
-            return 0;
-          } else {
-            importedProductCount = importedProductCount + result.affectedRows;
-           
-         //   console.log(p.id + 'in');
-            return result.affectedRows;
-          }
-        });
-
-        
-       // console.log(p, 'out');
-        return _x;
-} 
+run();
 
 
 
-
-
-
-
+/*
 async function importProducts(url: string) {
     //Define api request url and callback
     const options = {
@@ -97,31 +79,29 @@ async function importProducts(url: string) {
         let p = new Product(productId, productBrand, productName, productUrl);
 
         //Add the product into DB
-        insertProductIntoDB(p);
+       // productStorage.save(p);
+        
         products.push(p);
         
     });
-
-
-
 }
 
+*/
 
 
-const pageToScrape = 1;
-const fistPageUrl : string = 'https://www.ssense.com/en-us/men';
-const pageUrlPagination: string = 'https://www.ssense.com/en-us/men?page=';
-for (let p = 1; p <= pageToScrape; p++) { 
+/*
+for (let p = 1; p <= config.scraper.numberOfPage; p++) { 
     if (p == 1) {
-        var productsPageUrl = fistPageUrl;
+        var productsPageUrl = config.scraper.fistPageUrl;
     } else {
-        var productsPageUrl = pageUrlPagination + p;
+        var productsPageUrl = config.scraper.pageUrlPagination + p;
     }
     console.log('Importing page #'+p + 'from url: '+ productsPageUrl);
     importProducts(productsPageUrl);
     console.log(importedProductCount + 'Product imported so far');
 }
 
+*/
 
 
 //connection.end();

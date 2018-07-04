@@ -12,49 +12,44 @@ export class ProductStorageMysql implements ProductStorageInterface{
         //init class        
     }
 
-    public save(product:ProductInterface) : number {
-        
-        console.log(product);
+    public async save(product:ProductInterface) : Promise<Array<any>> {
+      
+        var sql = "REPLACE INTO product (id, name, brand, url, timestamp_added) VALUES ?";
+        var dateTime = new Date();
+        var timeNow = dateTime.getFullYear()+'-'+dateTime.getMonth()+'-'+dateTime.getDay()+' '+dateTime.getHours()+':'+dateTime.getMinutes();
+        var values = [
+          [product.id, product.name, product.brand, product.url,  timeNow]
+        ];
 
-        return 0;
+        var result = await this.executeQuery(sql,[values]);
+   
+        console.log(result);
+        // result.affectedRows;
+
+       return result;
+        
     }
 
 
     public async list(offset:number, limit: number): Promise<Array<ProductInterface>>
     {
-
         var sql = 'SELECT * FROM `product` LIMIT ' + offset + ',' + limit;
-
-
         var data = await this.executeQuery(sql);
         return this._formatResults(data);
 
     }
 
-    protected executeQuery (sql: string) : Promise<Array<ProductInterface>>
+    protected executeQuery (sql: string, params?:any) : Promise<Array<ProductInterface>>
     {
         return new Promise( ( resolve, reject ) => {
-            this.connection.query( sql, null, ( err, rows ) => {
+            this.connection.query( sql, params, ( err, rows ) => {
                 if ( err )
-                    return reject( err );
+                    return reject(  );
                 resolve( rows );
             } );
         } );
     }
-/*
-    protected async executeQuerySynchronous(sql: string){
-    
-        try{
-           var rows = await this.executeQuery(sql);
-           console.log('await');
-           return rows;
-            
-        }catch(_err) {
-            return [];
-        }
 
-    }
-*/
     /**
      * Format results
      * @param queryResult 
