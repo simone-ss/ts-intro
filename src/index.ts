@@ -1,12 +1,10 @@
 import express from 'express';
 import mysql from 'mysql';
+import {ProductStorageMysql} from 'app/lib/Infrastructure/ProductStorageMysql';
 
 const app = express();
 const port = 3000;
 const config = require('app/config/config');  //avoid require use import
-
-
-import {ProductStorageMysql} from 'app/lib/Infrastructure/ProductStorageMysql';
 
 
 //Create db connection
