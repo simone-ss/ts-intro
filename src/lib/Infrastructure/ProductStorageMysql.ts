@@ -23,7 +23,7 @@ export class ProductStorageMysql implements ProductStorageInterface{
 
         var result = await this.executeQuery(sql,[values]);
    
-        console.log(result);
+       
         // result.affectedRows;
 
        return result;
@@ -37,6 +37,22 @@ export class ProductStorageMysql implements ProductStorageInterface{
         var data = await this.executeQuery(sql);
         return this._formatResults(data);
 
+    }
+
+    public async delete(id:number) : Promise<Array<any>> {
+      
+        var sql = 'DELETE FROM product WHERE id = ? LIMIT 1';
+        var values = [
+         id
+        ];
+
+        var result = await this.executeQuery(sql,[values]);
+   
+       console.log(result);
+        // result.affectedRows;
+
+       return result;
+        
     }
 
     protected executeQuery (sql: string, params?:any) : Promise<Array<ProductInterface>>
