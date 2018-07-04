@@ -1,0 +1,10 @@
+--bail
+--require ts-node/register
+--require tsconfig-paths/register
+--require source-map-support/register
+--full-trace
+--reporter spec
+--colors
+--recursive
+--timeout 10000
+test/**/*.ts
