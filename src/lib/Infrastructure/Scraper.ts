@@ -16,9 +16,9 @@ export class Scraper {
     {
         for (let p = 1; p <= this.numberOfPage; p++) { 
             let pageUrl = this._buildPageUrl(p);
-            console.log('Importing page #'+p + 'from url: '+ pageUrl);
+           // console.log('Scraping page #'+p + 'from url: '+ pageUrl);
             await this.scrapeProducts(pageUrl);
-            console.log('Product imported so far: '+ this.products.length);
+           // console.log('Product parsed so far: '+ this.products.length);
         }
     }
 

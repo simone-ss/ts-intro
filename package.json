@@ -5,7 +5,9 @@
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
     "imp": "ts-node -r tsconfig-paths/register src/import.ts",
-    "test": "nyc --reporter=text-summary mocha"
+    "test": "nyc --reporter=text-summary mocha",
+    "test-local": "nyc --reporter=text-summary mocha",
+    "lint": "tslint -t verbose --project tsconfig.json -c tslint.json"
   },
   "dependencies": {
     "@types/cheerio": "^0.22.8",
