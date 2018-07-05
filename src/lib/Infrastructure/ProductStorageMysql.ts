@@ -2,6 +2,8 @@ import { ProductStorageInterface } from "app/lib/Model/Product/ProductStorageInt
 import { ProductInterface } from  'app/lib/Model/Product/ProductInterface';
 import { Product } from 'app/lib/Model/Product/Product';
 import { Connection } from 'mysql';
+import { ProductStorageResponse } from "app/lib/Model/Product/ProductStorageResponse";
+//import { ProductStorageResponseInterface } from "app/lib/Model/Product/ProductStorageResponseInterface";
 
 
 // Define Product Class
@@ -12,7 +14,7 @@ export class ProductStorageMysql implements ProductStorageInterface{
         //init class        
     }
 
-    public async save(product:ProductInterface) : Promise<Array<any>> {
+    public async save(product:ProductInterface) : Promise<any> {
       
         var sql = "REPLACE INTO product (id, name, brand, url, timestamp_added) VALUES ?";
         var dateTime = new Date();
@@ -20,13 +22,14 @@ export class ProductStorageMysql implements ProductStorageInterface{
         var values = [
           [product.id, product.name, product.brand, product.url,  timeNow]
         ];
-
-        var result = await this.executeQuery(sql,[values]);
-   
-       
-        // result.affectedRows;
-
-       return result;
+        
+        return new Promise( ( resolve, reject ) => {
+            this.connection.query( sql, [values], ( err, rows ) => {
+                if ( err )
+                     return reject( new ProductStorageResponse(false, 0) );
+                return resolve( new ProductStorageResponse(true, rows.affectedRows) );
+            } );
+        } );
         
     }
 
@@ -36,23 +39,24 @@ export class ProductStorageMysql implements ProductStorageInterface{
         var sql = 'SELECT * FROM `product` LIMIT ' + offset + ',' + limit;
         var data = await this.executeQuery(sql);
         return this._formatResults(data);
-
     }
 
-    public async delete(id:number) : Promise<Array<any>> {
+    public async delete(id:number) : Promise<any> {
       
-        var sql = 'DELETE FROM product WHERE id = ? LIMIT 1';
-        var values = [
+        let sql = 'DELETE FROM product WHERE id = ? LIMIT 1';
+        let values = [
          id
         ];
 
-        var result = await this.executeQuery(sql,[values]);
-   
-       console.log(result);
-        // result.affectedRows;
-
-       return result;
-        
+        //let result = await this.executeQuery(sql,[values]);
+        //return result;
+        return new Promise( ( resolve, reject ) => {
+            this.connection.query( sql, [values], ( err, rows ) => {
+                if ( err )
+                     return reject( new ProductStorageResponse(false, 0) );
+                return resolve( new ProductStorageResponse(true, rows.affectedRows) );
+            } );
+        } );
     }
 
     protected executeQuery (sql: string, params?:any) : Promise<Array<ProductInterface>>

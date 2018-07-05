@@ -1,6 +1,7 @@
 import express from 'express';
 import mysql from 'mysql';
 import {ProductStorageMysql} from 'app/lib/Infrastructure/ProductStorageMysql';
+import { ProductApi } from 'app/lib/Model/Product/ProductApi';
 
 const app = express();
 const port = 3000;
@@ -13,7 +14,7 @@ connection.connect();
 
 // Initialize productStorage
 let productStorage =  new ProductStorageMysql(connection);
-
+let productApi = new ProductApi(productStorage, config.api);
 
 
 
@@ -22,28 +23,22 @@ let productStorage =  new ProductStorageMysql(connection);
  */
 app.get('/products/', (req, res) => {
 
-    //Get offset and limit
+    //Get page parameter from url
     let page = (isNaN(req.query.page)) ? 1 : parseInt(req.query.page);  
    
-    let limit = page * config.api.itemPerPage
-    let offset = limit - config.api.itemPerPage;
-  
-    productStorage.list(offset, limit).then((data)=>{
+    //Exacute the api
+    productApi.list(page).then((apiResponse)=>{
 
-        var responseObject = {
-            success: true,
-            data: data,
-         }
-
-        if(Object.keys(data).length === 0) {
+        //if(Object.keys(data).length === 0) {
             //Page not found
-            res.send(404);
-        } 
+          //  res.send(404);
+            //return;
+     //   }
 
-        res.json(responseObject);
+        res.json(apiResponse);
     }).catch(e=>{
         console.log(e);
-        res.json({success:false});
+        res.send(400);
     })
 
 })
@@ -55,19 +50,15 @@ app.delete('/product/', (req, res) => {
 
     if (isNaN(req.query.id)) { 
         res.send(404);
+        return;
     }
     let productId = req.query.id;
  
-    productStorage.delete(productId).then( (data:any) => {
-
-        var responseObject = {
-            success: (data.affectedRows > 0)? true:false,
-            affectedRows: data.affectedRows,
-         }
-        res.json(responseObject);
+    productApi.delete(productId).then( (apiResponse:any) => {
+        res.json(apiResponse);
     }).catch(e=>{
         console.log(e);
-        res.json({success:false});
+        res.send(500);
     })
 })
 
