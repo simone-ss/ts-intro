@@ -7,25 +7,31 @@ import { ProductStorageResponseInterface } from "app/lib/Model/Product/ProductSt
 // Define Product Class
 export class ProductStorageInmemory implements ProductStorageInterface{
     
-    productList : ProductInterface[] = [];
+    productList: { [key: string]: ProductInterface } = {};
 
     constructor() {
         //init class        
     }
 
+
     public async save(product:ProductInterface) : Promise<ProductStorageResponseInterface> {
-        this.productList[product.id] = product;
-        return this._buildPromise(1);
         
+        
+       // let productList2: { [key: string]: ProductInterface } = {};
+        this.productList[product.id]= product;
+
+
+        return this._buildPromise(1); 
     }
 
     public async list(offset:number, limit: number): Promise<any> {
         let products = Object.entries(this.productList).slice(offset,limit).map(entry => entry[1]);
+
+
         return new Promise( ( resolve, _reject ) => {
                 resolve( products );
                 return products;
         } );
-
     }
 
     public async delete(id:number) : Promise<ProductStorageResponseInterface> {
@@ -47,7 +53,6 @@ export class ProductStorageInmemory implements ProductStorageInterface{
                 return response;
         } );
     }
-
 
 
 }

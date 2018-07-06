@@ -1,35 +1,108 @@
 import { assert } from  'chai'; 
-
 import { ProductStorageInmemory } from 'app/lib/Infrastructure/ProductStorageInmemory';
 import { Product } from 'app/lib/Model/Product/Product';
 import { ProductApi } from 'app/lib/Model/Product/ProductApi';
 import {ProductApiListResponse, ProductApiDeleteResponse} from 'app/lib/Model/Product/ProductApiResponses';
 import {Scraper} from 'app/lib/Infrastructure/Scraper';
 import {readFileSync} from 'fs';
-import { ProductStorageResponse } from 'app/lib/Model/Product/ProductStorageResponse';
+
+//import { ProductStorageResponse } from 'app/lib/Model/Product/ProductStorageResponse';
 const config = require('app/config/config');
 
 
+// Initialize objects
+/*
+let productStorage  = new ProductStorageInmemory();
+let api             = new ProductApi(productStorage, config.api);
+let productScraper = new Scraper('','',1);
+*/
+describe('Product Api', () => {
+  describe('Scrape and list', () => {
 
-let productStorage = new ProductStorageInmemory();
-let api = new ProductApi(productStorage, config.api);
-var testHtml:string = readFileSync( __dirname +'/mockData/product.html', 'utf8');
-// Initialize productScraper
-let productScraper = new Scraper(
-  config.scraper.fistPageUrl,
-  config.scraper.pageUrlPagination,
-  config.scraper.numberOfPage
-);
+    let productScraper  = new Scraper('','',1);
+    let productStorage  = new ProductStorageInmemory();
+    let api             = new ProductApi(productStorage, config.api);
+    let productList:ProductApiListResponse;
 
+    before(async () => {
+        // Scrape products
+        var testHtml:string = readFileSync( __dirname +'/mockData/product.html', 'utf8');
+        let c:CheerioStatic = await productScraper.loadHtml(testHtml);
+        productScraper.scrapeProducts(c);
 
+        //Save Product 
+        productScraper.products.forEach(async function(el){
+          await productStorage.save(el);
+        });
+
+        //Load Product using api
+        productList = await api.list(1);
+    });
+
+    it('api.list() response should be an instance of ProductApiListResponse', function() {
+        assert.instanceOf(productList, ProductApiListResponse);
+    });
+  
+    it('api.list() should retourn product scraped', function() {
+        assert.isAbove(productList.data.length, 0);
+    });
+
+    it('First product returned by api.list() should match first product scraped', function() {
+        assert.equal(productList.data[0].id, 2986438);
+        assert.equal(productList.data[0].name, 'Black Nicholas Sweater');
+        assert.equal(productList.data[0].brand,  'Acne Studios');
+    });
+
+  });
+
+  describe('Delete product', () => {
 
   
+    let productStorage:ProductStorageInmemory; 
+    let product1        = new Product(111, 'name', 'brand', 'url');
+    let product2        = new Product(222, 'name', 'brand', 'url');
+    let api:ProductApi;
+
+    beforeEach(async () => {
+        //Preload Product
+       
+        productStorage  = new ProductStorageInmemory();
+        productStorage.save(product1);
+        productStorage.save(product2);
+        api = new ProductApi(productStorage, config.api);
+    });
+
+    it('api.delete() should return an instance of ProductApiDeleteResponse', async ()=> {
+      let deleteResponse =  await api.delete(product1.id);
+      assert.instanceOf(deleteResponse, ProductApiDeleteResponse);
+    });
+
+    it('api.delete() should delete product', async () => {
+      let numberOfProducts = Object.keys(productStorage.productList).length;
+      await api.delete(product1.id);
+      assert.equal(Object.keys(productStorage.productList).length, numberOfProducts-1);
+    });
+
+    it('api.list() should return not return deleted product', async () => {
+    
+      await api.delete(product1.id);
+      let listResponse:ProductApiListResponse = await api.list(1);
+      assert.equal(listResponse.data.length, 1);
+      assert.equal(listResponse.data[0].id, product2.id),'';
+    });
+    
+
+  });
+
+});
+/*
 //====================================================================================//
 // Scraper: Scrape products
 //====================================================================================//
-describe('Scraper', function() {
+describe('Scraper', () => {
   describe('scrape product', function() {
-    before(async function() {
+    before(async () => {
+      var testHtml:string = readFileSync( __dirname +'/mockData/product.html', 'utf8');
       let c:CheerioStatic = await productScraper.loadHtml(testHtml);
       productScraper.scrapeProducts(c);
     });
@@ -65,13 +138,18 @@ describe('Storage', function() {
         assert.instanceOf(response, ProductStorageResponse, 'response type expected: ProductStorageResponse');
         assert.equal(response.status, true, 'Response status must be true');
         assert.equal(response.affectedRows, 1);
-       });   
+
+        // to do add get by ID test
+
+      });   
     });
   });
 });
 
 
-
+//====================================================================================//
+// Api: test api calls
+//====================================================================================//
 describe('Api', function() {
   describe('#list()', function() {
     let productList:any;
@@ -94,6 +172,9 @@ describe('Api', function() {
   });
 
 
+//====================================================================================//
+// Delete: test api calls
+//====================================================================================//
   describe('#delete()', function() {
     var deleteResponse:any;
     var p1: Product;
@@ -122,80 +203,9 @@ describe('Api', function() {
       assert.equal(dr.status, true);
     });
    
+    // to do add get by ID test
+
   });
-
-});
-
-/*
-describe('Scraper', function() {
-   describe('#scrapeAll()', function() {
-
-    before(async function() {
-        await productScraper.scrapeAll();
-    });
-     
-    it('should populate products array', function() {
-      assert.isAbove(productScraper.products.length, 0);
-    });
-
-    it('products[0]product.id should not be empty', function() {
-      assert.isAbove(productScraper.products[0].id, 0);
-    });
-
-    it('products[0]product.name should not be empty', function() {
-        assert.isAbove(productScraper.products[0].name.length, 0);
-    });
-
-    it('products[0]product.brand should not be empty', function() {
-        assert.isAbove(productScraper.products[0].brand.length, 0);
-    });
-    
-  });
-
-});
-
-
-describe('mysql', function() {
-  describe('connect()', function() {
-  
-    it('should connect to db', function(done) {
-     
-     // assert.equal(connection.state, 'authenticated');
-       connection.connect(function(){
-        if (connection.state != 'authenticated')
-          done(new Error('Error connecting to database'));
-
-        done();
-      });
-    });
-       
- });
-
-});
-
-
-describe('ProductStorageMysql', function() {
-  describe('#list()', function() {
-
-    var productList: any;
-
-    before(async function() {
-      //Create db connection
-      let productStorage =  new ProductStorageMysql(connection);
-      productList = await productStorage.list(0,2);
-    
-
-    });
-   
-    it('should return results', function() {
-      assert.isAbove(productList.length, 0);
-    });
-
-    it('results product should be instance of Product', function() {
-      assert.instanceOf(productList[0], Product);
-    });
-       
- });
 
 });
 */
