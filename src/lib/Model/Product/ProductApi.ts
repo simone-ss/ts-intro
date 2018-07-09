@@ -1,10 +1,11 @@
 import { ProductStorageInterface } from "app/lib/Model/Product/ProductStorageInterface";
 import {ProductApiListResponse, ProductApiDeleteResponse} from "app/lib/Model/Product/ProductApiResponses"; 
+import {config} from 'app/config/config';
 
 export class ProductApi{
 
 
-    constructor(protected productStorage: ProductStorageInterface, protected config: any) {
+    constructor(protected productStorage: ProductStorageInterface, protected conf:typeof config.api) {
         
     }
 
@@ -12,8 +13,8 @@ export class ProductApi{
     public async list(page:number)
     {
 
-        let limit = page * this.config.itemPerPage;
-        let offset = limit - this.config.itemPerPage;
+        let limit = page * this.conf.itemPerPage;
+        let offset = limit - this.conf.itemPerPage;
 
         var promisData = await this.productStorage.list(offset, limit);
 

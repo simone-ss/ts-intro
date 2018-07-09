@@ -7,7 +7,7 @@ import {Scraper} from 'app/lib/Infrastructure/Scraper';
 import {readFileSync} from 'fs';
 
 //import { ProductStorageResponse } from 'app/lib/Model/Product/ProductStorageResponse';
-const config = require('app/config/config');
+import {config} from 'app/config/config';
 
 
 // Initialize objects

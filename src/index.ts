@@ -3,10 +3,12 @@ import mysql from 'mysql';
 import {ProductStorageMysql} from 'app/lib/Infrastructure/ProductStorageMysql';
 import { ProductApi } from 'app/lib/Model/Product/ProductApi';
 import { ProductApiResponseInterface } from 'app/lib/Model/Product/ProductApiResponses';
+import {config} from 'app/config/config';
+
 
 const app = express();
 const port = 3000;
-const config = require('app/config/config');  //avoid require use import
+//const config = require('app/config/config');  //avoid require use import
 
 
 //Create db connection
@@ -54,7 +56,9 @@ app.delete('/product/', (req, res) => {
         return;
     }
     let productId = req.query.id;
- 
+    
+
+
     productApi.delete(productId).then( (apiResponse:ProductApiResponseInterface) => {
         res.json(apiResponse);
     }).catch(e=>{

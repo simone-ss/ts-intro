@@ -1,7 +1,7 @@
 //import rp from 'request-promise';
 //import cheerio from 'cheerio';
 
-const config = require('./config/config');
+import {config} from 'app/config/config';
 
 import mysql from 'mysql';
 //import {Product} from  './lib/Model/Product/Product';
