@@ -2,6 +2,7 @@ import express from 'express';
 import mysql from 'mysql';
 import {ProductStorageMysql} from 'app/lib/Infrastructure/ProductStorageMysql';
 import { ProductApi } from 'app/lib/Model/Product/ProductApi';
+import { ProductApiResponseInterface } from 'app/lib/Model/Product/ProductApiResponses';
 
 const app = express();
 const port = 3000;
@@ -54,7 +55,7 @@ app.delete('/product/', (req, res) => {
     }
     let productId = req.query.id;
  
-    productApi.delete(productId).then( (apiResponse:any) => {
+    productApi.delete(productId).then( (apiResponse:ProductApiResponseInterface) => {
         res.json(apiResponse);
     }).catch(e=>{
         console.log(e);

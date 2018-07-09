@@ -24,11 +24,9 @@ export class ProductStorageInmemory implements ProductStorageInterface{
         return this._buildPromise(1); 
     }
 
-    public async list(offset:number, limit: number): Promise<any> {
+    public async list(offset:number, limit: number): Promise<Array<ProductInterface>> {
         let products = Object.entries(this.productList).slice(offset,limit).map(entry => entry[1]);
-
-
-        return new Promise( ( resolve, _reject ) => {
+        return new Promise<Array<ProductInterface>>( ( resolve, _reject ) => {
                 resolve( products );
                 return products;
         } );
@@ -46,7 +44,7 @@ export class ProductStorageInmemory implements ProductStorageInterface{
         
     } 
 
-    protected _buildPromise(affectedRows: any) : Promise<ProductStorageResponseInterface> {
+    protected _buildPromise(affectedRows: number) : Promise<ProductStorageResponseInterface> {
         return new Promise( ( resolve, _reject ) => {
             let response = new ProductStorageResponse(true, affectedRows)
                 resolve( response );

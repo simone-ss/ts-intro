@@ -14,7 +14,7 @@ export class ProductStorageMysql implements ProductStorageInterface{
         //init class        
     }
 
-    public async save(product:ProductInterface) : Promise<any> {
+    public async save(product:ProductInterface) : Promise<ProductStorageResponse> {
       
         var sql = "REPLACE INTO product (id, name, brand, url, timestamp_added) VALUES ?";
         var dateTime = new Date();
@@ -22,11 +22,11 @@ export class ProductStorageMysql implements ProductStorageInterface{
         var values = [
           [product.id, product.name, product.brand, product.url,  timeNow]
         ];
-        
-        return new Promise( ( resolve, reject ) => {
+
+        return new Promise<ProductStorageResponse>( ( resolve, reject ) => {
             this.connection.query( sql, [values], ( err, rows ) => {
                 if ( err )
-                     return reject( new ProductStorageResponse(false, 0) );
+                     return reject( err );
                 return resolve( new ProductStorageResponse(true, rows.affectedRows) );
             } );
         } );
@@ -41,19 +41,17 @@ export class ProductStorageMysql implements ProductStorageInterface{
         return this._formatResults(data);
     }
 
-    public async delete(id:number) : Promise<any> {
+    public async delete(id:number) : Promise<ProductStorageResponse> {
       
         let sql = 'DELETE FROM product WHERE id = ? LIMIT 1';
         let values = [
          id
         ];
 
-        //let result = await this.executeQuery(sql,[values]);
-        //return result;
-        return new Promise( ( resolve, reject ) => {
+        return new Promise<ProductStorageResponse>( ( resolve, reject ) => {
             this.connection.query( sql, [values], ( err, rows ) => {
                 if ( err )
-                     return reject( new ProductStorageResponse(false, 0) );
+                     return reject( err );
                 return resolve( new ProductStorageResponse(true, rows.affectedRows) );
             } );
         } );
@@ -64,7 +62,7 @@ export class ProductStorageMysql implements ProductStorageInterface{
         return new Promise( ( resolve, reject ) => {
             this.connection.query( sql, params, ( err, rows ) => {
                 if ( err )
-                    return reject(  );
+                    return reject( err );
                 resolve( rows );
             } );
         } );
