@@ -57,7 +57,7 @@ export class ProductStorageMysql implements ProductStorageInterface{
         } );
     }
 
-    protected executeQuery (sql: string, params?:any) : Promise<Array<ProductInterface>>
+    protected executeQuery (sql: string, params?:Array<string|number>) : Promise<Array<ProductInterface>>
     {
         return new Promise( ( resolve, reject ) => {
             this.connection.query( sql, params, ( err, rows ) => {
