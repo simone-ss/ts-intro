@@ -8,8 +8,6 @@ import {config} from 'app/config/config';
 
 const app = express();
 const port = 3000;
-//const config = require('app/config/config');  //avoid require use import
-
 
 //Create db connection
 let connection = mysql.createConnection(config.db);
@@ -28,7 +26,7 @@ app.get('/products/', (req, res) => {
 
     //Get page parameter from url
     let page = (isNaN(req.query.page)) ? 1 : parseInt(req.query.page);  
-   
+
     //Exacute the api
     productApi.list(page).then((apiResponse)=>{
 
@@ -43,7 +41,7 @@ app.get('/products/', (req, res) => {
         console.log(e);
         res.send(400);
     })
-
+   
 })
 
 /**

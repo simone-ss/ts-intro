@@ -1,14 +1,15 @@
+#Dockerhub image
 FROM node:8
 
-# Create app directory
+# Define app dir on remote server
 WORKDIR /app
-
-COPY package.json yarn.lock ./
-
-RUN yarn install
 
 # Bundle app source
 COPY . .
 
-EXPOSE 8080
+RUN yarn install
+
+# Port Exposed
+EXPOSE 3000
+
 CMD ["yarn", "run", "start"]

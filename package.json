@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
+    "start2": "ts-node -r tsconfig-paths/register src/index2.ts",
+    "dev": "NODE_ENV=development ./node_modules/nodemon/bin/nodemon.js --watch app -e ts --exec 'ts-node -r tsconfig-paths/register src/index.ts'",
     "imp": "ts-node -r tsconfig-paths/register src/import.ts",
     "try": "ts-node -r tsconfig-paths/register src/try.ts",
-    "test": "nyc --reporter=text-summary mocha",
+    "test": "mocha",
     "lint": "tslint -t verbose --project tsconfig.json -c tslint.json"
   },
   "dependencies": {
@@ -19,6 +21,7 @@
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.3",
     "node-mysql-wrapper": "^2.9.3",
+    "nodemon": "^1.17.5",
     "promise": "^8.0.1",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
@@ -30,7 +33,6 @@
     "@types/chai": "^4.1.4",
     "@types/mocha": "^5.2.3",
     "chai": "^4.1.2",
-    "mocha": "^5.2.0",
-    "nyc": "^12.0.2"
+    "mocha": "^5.2.0"
   }
 }
